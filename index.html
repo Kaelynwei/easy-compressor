@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Koala Image Compressor</title>
+  <title>EaSy Image Compressor</title>
   <style>
     body {
       font-family: sans-serif;
@@ -27,13 +27,26 @@
       padding: 0.5rem 1rem;
       font-size: 1rem;
     }
+    @media (max-width: 600px) {
+      .drop-area {
+        padding: 1rem;
+      }
+      .download-btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
   </style>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
 <body>
-  <h1>Easy Image Compressor </h1>
-  <p>免費圖片壓縮工具，支援 JPG / PNG / WebP</p>
+  <h1>Easy Image Compressor</h1>
+  <p>A free image compression tool that supports JPG / PNG / WebP</p>
   <div class="drop-area" id="drop-area">
-    <p>拖曳圖片到這裡，或點擊以下按鈕選擇</p>
+    <p>Drag and drop an image here, or click the button below to select one</p>
     <input type="file" id="fileInput" accept="image/*">
   </div>
 
@@ -77,9 +90,9 @@
           canvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
             preview.innerHTML = `
-              <p>原圖大小：${(file.size / 1024).toFixed(1)} KB</p>
-              <p>壓縮後大小：約 ${(blob.size / 1024).toFixed(1)} KB</p>
-              <a href="${url}" download="compressed.jpg" class="download-btn">下載壓縮圖片</a>
+              <p>Original size: ${(file.size / 1024).toFixed(1)} KB</p>
+              <p>Compressed size: approx. ${(blob.size / 1024).toFixed(1)} KB</p>
+              <a href="${url}" download="compressed.jpg" class="download-btn">Download Compressed Image</a>
             `;
           }, "image/jpeg", 0.7);
         };
