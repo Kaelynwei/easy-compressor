@@ -63,53 +63,72 @@
   <canvas id="canvas" style="display: none;"></canvas>
   <div class="preview" id="preview"></div>
 
-  <script>
-    const dropArea = document.getElementById("drop-area");
-    const fileInput = document.getElementById("fileInput");
-    const canvas = document.getElementById("canvas");
-    const preview = document.getElementById("preview");
+ <script>
+  const dropArea = document.getElementById("drop-area");
+  const fileInput = document.getElementById("fileInput");
+  const canvas = document.getElementById("canvas");
+  const preview = document.getElementById("preview");
 
-    dropArea.addEventListener("click", () => fileInput.click());
-    dropArea.addEventListener("dragover", e => {
-      e.preventDefault();
-      dropArea.classList.add("hover");
-    });
-    dropArea.addEventListener("dragleave", () => dropArea.classList.remove("hover"));
-    dropArea.addEventListener("drop", e => {
-      e.preventDefault();
-      dropArea.classList.remove("hover");
-      handleFiles(e.dataTransfer.files);
-    });
-
-    fileInput.addEventListener("change", () => handleFiles(fileInput.files));
-
-    function handleFiles(files) {
-      const file = files[0];
-      if (!file.type.startsWith("image/")) return;
-
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-          const ctx = canvas.getContext("2d");
-          const MAX_WIDTH = 800;
-          const scale = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scale;
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            preview.innerHTML = `
-              <p>Original size: ${(file.size / 1024).toFixed(1)} KB</p>
-              <p>Compressed size: approx. ${(blob.size / 1024).toFixed(1)} KB</p>
-              <a href="${url}" download="compressed.jpg" class="download-btn">Download Compressed Image</a>
-            `;
-          }, "image/jpeg", 0.7);
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+  dropArea.addEventListener("click", (e) => {
+    if (e.target === dropArea || e.target.tagName === "P") {
+      fileInput.click();
     }
-  </script>
+  });
+
+  dropArea.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropArea.classList.add("hover");
+  });
+
+  dropArea.addEventListener("dragleave", () => {
+    dropArea.classList.remove("hover");
+  });
+
+  dropArea.addEventListener("drop", e => {
+    e.preventDefault();
+    dropArea.classList.remove("hover");
+    handleFiles(e.dataTransfer.files);
+  });
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files.length > 0) {
+      handleFiles(fileInput.files);
+    }
+  });
+
+  function handleFiles(files) {
+    const file = files[0];
+    if (!file.type.startsWith("image/")) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const ctx = canvas.getContext("2d");
+        const MAX_WIDTH = 800;
+        const scale = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scale;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          preview.innerHTML = `
+            <p>Original size: ${(file.size / 1024).toFixed(1)} KB</p>
+            <p>Compressed size: approx. ${(blob.size / 1024).toFixed(1)} KB</p>
+            <a href="${url}" download="compressed.jpg" class="download-btn">Download Compressed Image</a>
+          `;
+        }, "image/jpeg", 0.7);
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  }
+</script>
+
 </body>
 </html>
