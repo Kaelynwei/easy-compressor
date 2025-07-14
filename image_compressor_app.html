@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Koala Image Compressor</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    .drop-area {
+      border: 2px dashed #ccc;
+      padding: 2rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .drop-area.hover {
+      border-color: #666;
+    }
+    .preview {
+      margin-top: 1rem;
+    }
+    .download-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Koala Image Compressor 🐨</h1>
+  <p>免費圖片壓縮工具，支援 JPG / PNG / WebP</p>
+  <div class="drop-area" id="drop-area">
+    <p>拖曳圖片到這裡，或點擊以下按鈕選擇</p>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <canvas id="canvas" style="display: none;"></canvas>
+  <div class="preview" id="preview"></div>
+
+  <script>
+    const dropArea = document.getElementById("drop-area");
+    const fileInput = document.getElementById("fileInput");
+    const canvas = document.getElementById("canvas");
+    const preview = document.getElementById("preview");
+
+    dropArea.addEventListener("click", () => fileInput.click());
+    dropArea.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropArea.classList.add("hover");
+    });
+    dropArea.addEventListener("dragleave", () => dropArea.classList.remove("hover"));
+    dropArea.addEventListener("drop", e => {
+      e.preventDefault();
+      dropArea.classList.remove("hover");
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener("change", () => handleFiles(fileInput.files));
+
+    function handleFiles(files) {
+      const file = files[0];
+      if (!file.type.startsWith("image/")) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const ctx = canvas.getContext("2d");
+          const MAX_WIDTH = 800;
+          const scale = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scale;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            preview.innerHTML = `
+              <p>原圖大小：${(file.size / 1024).toFixed(1)} KB</p>
+              <p>壓縮後大小：約 ${(blob.size / 1024).toFixed(1)} KB</p>
+              <a href="${url}" download="compressed.jpg" class="download-btn">下載壓縮圖片</a>
+            `;
+          }, "image/jpeg", 0.7);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
